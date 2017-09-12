@@ -23,27 +23,59 @@
  */
 package se.kth.id1212.rmi.objprotocolchat.server.controller;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
+import se.kth.id1212.rmi.objprotocolchat.common.ChatClient;
+import se.kth.id1212.rmi.objprotocolchat.common.ChatServer;
 import se.kth.id1212.rmi.objprotocolchat.server.model.Conversation;
+import se.kth.id1212.rmi.objprotocolchat.server.model.Participant;
 
 /**
- * The server side controller. All calls to the server side model pass through here.
+ * The chat server controller, which is also the remote object called by participants on remote
+ * nodes. Note that there can only be one chat conversation at a time. All participants participate
+ * in that same conversation.
  */
-public class Controller {
+public class Controller extends UnicastRemoteObject implements ChatServer {
     private final Conversation conversation = new Conversation();
-
-    /**
-     * Appends the specified entry to the conversation.
-     *
-     * @param entry The entry to append.
-     */
-    public void appendEntry(String entry) {
-        conversation.appendEntry(entry);
+    private final List<Participant> participants = new ArrayList<>();
+    
+    public Controller() throws RemoteException {
     }
 
-    /**
-     * @return All entries in the conversation, in the order they were entered.
-     */
-    public String[] getConversation() {
-        return conversation.getConversation();
+    @Override
+    public void joinConversation(ChatClient remoteNode) {
+        Participant joiningParticipant = new Participant(remoteNode);
+        participants.add(joiningParticipant);
+        for (String msg : conversation.getConversation()) {
+            joiningParticipant.send(msg);
+        }
+    }
+
+    @Override
+    public void broadcastMsg(String msg) {
+        for (Participant participant : participants) {
+            participant.send(msg);
+        }
+    }
+
+    @Override
+    public void disconnect(ChatClient remoteNode) {
+        participants.remove(findParticipantWithRemObj(remoteNode));
+    }
+
+    @Override
+    public void setUsername(ChatClient remoteNode, String username) throws RemoteException {
+        findParticipantWithRemObj(remoteNode).setUsername(username);
+    }
+    
+    private Participant findParticipantWithRemObj(ChatClient remoteNode) {
+        for (Participant participant : participants) {
+            if (participant.hasRemoteNode(remoteNode)) {
+                return participant;
+            }
+        }
+        return null;
     }
 }

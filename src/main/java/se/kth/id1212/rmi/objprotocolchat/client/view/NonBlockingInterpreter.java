@@ -23,8 +23,11 @@
  */
 package se.kth.id1212.rmi.objprotocolchat.client.view;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
-import se.kth.id1212.rmi.objprotocolchat.server.controller.Controller;
+import se.kth.id1212.rmi.objprotocolchat.common.ChatClient;
+import se.kth.id1212.rmi.objprotocolchat.common.ChatServer;
 
 /**
  * Reads and interprets user commands. The command interpreter will run in a separate thread, which
@@ -35,20 +38,26 @@ import se.kth.id1212.rmi.objprotocolchat.server.controller.Controller;
 public class NonBlockingInterpreter implements Runnable {
     private static final String PROMPT = "> ";
     private final Scanner console = new Scanner(System.in);
-    private boolean receivingCmds = false;
-    private Controller contr;
+    private final ConsoleOutput myRemoteObj;
     private final ThreadSafeStdOut outMgr = new ThreadSafeStdOut();
+    private ChatServer server;
+    private boolean receivingCmds = false;
+
+    public NonBlockingInterpreter() throws RemoteException {
+        myRemoteObj = new ConsoleOutput();
+    } 
 
     /**
      * Starts the interpreter. The interpreter will be waiting for user input when this method
      * returns. Calling <code>start</code> on an interpreter that is already started has no effect.
+     *
+     * @param server The server with which this chat client will communicate.
      */
-    public void start() {
+    public void start(ChatServer server) {
         if (receivingCmds) {
             return;
         }
         receivingCmds = true;
-        contr = new Controller();
         new Thread(this).start();
     }
 
@@ -63,18 +72,16 @@ public class NonBlockingInterpreter implements Runnable {
                 switch (cmdLine.getCmd()) {
                     case QUIT:
                         receivingCmds = false;
-                        contr.disconnect();
+                        server.disconnect(myRemoteObj);
                         break;
                     case CONNECT:
-                        contr.connect(cmdLine.getParameter(0),
-                                      Integer.parseInt(cmdLine.getParameter(1)),
-                                      new ConsoleOutput());
+                        server.joinConversation(myRemoteObj);
                         break;
                     case USER:
-                        contr.sendUsername(cmdLine.getParameter(0));
+                        server.setUsername(myRemoteObj, cmdLine.getParameter(0));
                         break;
                     default:
-                        contr.sendMsg(cmdLine.getUserInput());
+                        server.broadcastMsg(cmdLine.getUserInput());
                 }
             } catch (Exception e) {
                 outMgr.println("Operation failed");
@@ -87,9 +94,13 @@ public class NonBlockingInterpreter implements Runnable {
         return console.nextLine();
     }
 
-    private class ConsoleOutput implements OutputHandler {
+    private class ConsoleOutput extends UnicastRemoteObject implements ChatClient {
+
+        public ConsoleOutput() throws RemoteException {
+        }
+
         @Override
-        public void handleMsg(String msg) {
+        public void recvMsg(String msg) {
             outMgr.println((String) msg);
             outMgr.print(PROMPT);
         }

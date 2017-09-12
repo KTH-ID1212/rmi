@@ -23,29 +23,43 @@
  */
 package se.kth.id1212.rmi.objprotocolchat.common;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
 /**
  * The remote methods of a chat server.
  */
-public interface ChatServer {
-    /**
-     * Sets the username of the specified client.
-     *
-     * @param client   The client whose username shall be set.
-     * @param userName The username of the specified client.
-     */
-    void setUserName(ChatClient client, String userName);
+public interface ChatServer extends Remote {
+    public static final String SERVER_NAME_IN_REGISTRY = "CHAT_SERVER";
 
     /**
-     * Broadcasts the specified message to all connected clients.
+     * Makes a new participant join the conversation.
+     *
+     * @param remoteNode The remote endpoint of the joining participant. This is the remote object
+     *                   that will be used to send messages to the participant.
+     */
+    void joinConversation(ChatClient remoteNode) throws RemoteException;
+
+    /**
+     * Sets a new username for the participant with the specified remote endpoint.
+     *
+     * @param remoteNode The remote endpoint of the participant wishing to change username.
+     * @param userName   The participant's new username.
+     */
+    void setUsername(ChatClient remoteNode, String username) throws RemoteException;
+
+    /**
+     * Broadcasts the specified message to all participants in the conversation.
      *
      * @param msg The message to broadcast.
      */
-    void broadcastMsg(String msg);
+    void broadcastMsg(String msg) throws RemoteException;
 
     /**
-     * The specified client is about to disconnect. No more messages will be sent to that client.
+     * The specified participant is removed from the conversation, no more messages will be sent to
+     * that node.
      *
-     * @param client The client that will disconnect.
+     * @param remoteNode The remote endpoint of the leaving participant.
      */
-    void disconnect(ChatClient client);
+    void disconnect(ChatClient remoteNode) throws RemoteException;
 }
