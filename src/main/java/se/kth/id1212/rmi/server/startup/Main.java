@@ -21,17 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.client.startup;
+package se.kth.id1212.rmi.server.startup;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import se.kth.id1212.rmi.objprotocolchat.client.view.NonBlockingInterpreter;
-import se.kth.id1212.rmi.objprotocolchat.common.ChatServer;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import se.kth.id1212.rmi.server.controller.Controller;
 
 /**
- * Starts the chat client.
+ * Starts the chat servant and binds it in the RMI registry.
  */
 public class Main {
     /**
@@ -39,10 +39,19 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            ChatServer server = (ChatServer) Naming.lookup(ChatServer.SERVER_NAME_IN_REGISTRY);
-            new NonBlockingInterpreter().start(server);
-        } catch (NotBoundException | MalformedURLException | RemoteException ex) {
-            System.out.println("Could not start chat client.");
+            new Main().startRegistry();
+            Naming.rebind(Controller.SERVER_NAME_IN_REGISTRY, new Controller());
+            System.out.println("Server is running.");
+        } catch (MalformedURLException | RemoteException ex) {
+            System.out.println("Could not start chat server.");
+        }
+    }
+    
+    private void startRegistry() throws RemoteException {
+        try {
+            LocateRegistry.getRegistry().list();
+        } catch (RemoteException noRegistryIsRunning) {
+            LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         }
     }
 }

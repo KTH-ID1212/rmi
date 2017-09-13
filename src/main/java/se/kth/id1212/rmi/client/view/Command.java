@@ -21,16 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.common;
+package se.kth.id1212.rmi.client.view;
 
 /**
- * The callback methods of a chat client.
+ * Defines all commands that can be performed by a user of the chat application.
  */
-public interface ChatClient {
+public enum Command {
     /**
-     * The specified message is received by the client.
-     *
-     * @param msg The message that shall be received.
+     * Specifies a user name. This name will be prepended to all entries in the chat conversation.
      */
-    void recvMsg(String msg);
+    USER,
+    /**
+     * Establish a connection to the server. The first parameter is IP address (or host name), the
+     * second is port number.
+     */
+    CONNECT,
+    /**
+     * Leave the chat application.
+     */
+    QUIT,
+    /**
+     * No command was specified. This means the entire command line is interpreted as an entry in
+     * the conversation, and is sent to all clients.
+     */
+    NO_COMMAND
 }

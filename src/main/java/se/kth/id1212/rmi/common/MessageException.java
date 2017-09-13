@@ -21,27 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.client.view;
+
+package se.kth.id1212.rmi.common;
 
 /**
- * This class provides a thread safe output, all methods are synchronized. 
+ * Thrown when the expected message could not be received.
  */
-class ThreadSafeStdOut {
-    /**
-     * Prints the specified output to <code>System.out</code>,
-     * 
-     * @param output The output to print. 
-     */
-    synchronized void print(String output) {
-        System.out.print(output);
+public class MessageException extends RuntimeException {
+    public MessageException(String msg) {
+        super(msg);
     }
-
-    /**
-     * Prints the specified output, plus a line break, to <code>System.out</code>,
-     * 
-     * @param output The output to print. 
-     */
-    synchronized void println(String output) {
-        System.out.println(output);
+    
+    public MessageException(Throwable rootCause) {
+        super(rootCause);
     }
 }

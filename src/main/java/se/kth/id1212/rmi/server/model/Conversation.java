@@ -21,28 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.client.view;
+package se.kth.id1212.rmi.server.model;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Defines all commands that can be performed by a user of the chat application.
+ * Holds the entire conversation, including all messages from all clients. All methods are thread
+ * safe.
  */
-public enum Command {
+public class Conversation {
+    private final List<String> entries = Collections.synchronizedList(new ArrayList<>());
+
     /**
-     * Specifies a user name. This name will be prepended to all entries in the chat conversation.
+     * Appends the specified entry to the conversation.
+     *
+     * @param entry The entry to append.
      */
-    USER,
+    public void appendEntry(String entry) {
+        entries.add(entry);
+    }
+
     /**
-     * Establish a connection to the server. The first parameter is IP address (or host name), the
-     * second is port number.
+     * @return All entries in the conversation, in the order they were entered.
      */
-    CONNECT,
-    /**
-     * Leave the chat application.
-     */
-    QUIT,
-    /**
-     * No command was specified. This means the entire command line is interpreted as an entry in
-     * the conversation, and is sent to all clients.
-     */
-    NO_COMMAND
+    public String[] getConversation() {
+        return entries.toArray(new String[0]);
+    }
 }

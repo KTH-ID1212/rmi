@@ -21,32 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.server.model;
+package se.kth.id1212.rmi.client.startup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import se.kth.id1212.rmi.client.view.NonBlockingInterpreter;
+import se.kth.id1212.rmi.common.ChatServer;
 
 /**
- * Holds the entire conversation, including all messages from all clients. All methods are thread
- * safe.
+ * Starts the chat client.
  */
-public class Conversation {
-    private final List<String> entries = Collections.synchronizedList(new ArrayList<>());
-
+public class Main {
     /**
-     * Appends the specified entry to the conversation.
-     *
-     * @param entry The entry to append.
+     * @param args There are no command line arguments.
      */
-    public void appendEntry(String entry) {
-        entries.add(entry);
-    }
-
-    /**
-     * @return All entries in the conversation, in the order they were entered.
-     */
-    public String[] getConversation() {
-        return entries.toArray(new String[0]);
+    public static void main(String[] args) {
+        try {
+            ChatServer server = (ChatServer) Naming.lookup(ChatServer.SERVER_NAME_IN_REGISTRY);
+            new NonBlockingInterpreter().start(server);
+        } catch (NotBoundException | MalformedURLException | RemoteException ex) {
+            System.out.println("Could not start chat client.");
+        }
     }
 }

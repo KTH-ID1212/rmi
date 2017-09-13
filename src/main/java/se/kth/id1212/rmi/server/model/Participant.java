@@ -21,36 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.server.model;
+package se.kth.id1212.rmi.server.model;
 
-import se.kth.id1212.rmi.objprotocolchat.common.ChatClient;
+import java.rmi.RemoteException;
+import se.kth.id1212.rmi.common.ChatClient;
+import se.kth.id1212.rmi.common.MessageException;
 
 /**
  * Represents someone participating in the chat conversation.
  */
 public class Participant {
+    private static final String JOIN_MESSAGE = " joined conversation.";
+    private static final String LEAVE_MESSAGE = " left conversation.";
+    private static final String USERNAME_DELIMETER = ": ";
     private static final String DEFAULT_USERNAME = "anonymous";
+    private final long id;
+    private final ChatClient remoteNode;
+    private final ParticipantManager participantMgr;
     private String username;
-    private ChatClient remoteNode;
 
     /**
      * Creates a new instance with the specified username and remote node.
      *
+     * @param id         The unique identifier of this participant.
      * @param username   The username of the newly created instance.
      * @param remoteNode The remote endpoint of the newly created instance.
+     * @param mgr        The only existing participant manager.
      */
-    public Participant(String username, ChatClient remoteNode) {
+    public Participant(long id, String username, ChatClient remoteNode, ParticipantManager mgr) {
+        this.id = id;
         this.username = username;
         this.remoteNode = remoteNode;
+        this.participantMgr = mgr;
     }
 
     /**
      * Creates a new instance with the specified remote node and the default username.
      *
+     * @param id         The unique identifier of this participant.
      * @param remoteNode The remote endpoint of the newly created instance.
+     * @param mgr        The only existing participant manager.
      */
-    public Participant(ChatClient remoteNode) {
-        this(DEFAULT_USERNAME, remoteNode);
+    public Participant(long id, ChatClient remoteNode, ParticipantManager mgr) {
+        this(id, DEFAULT_USERNAME, remoteNode, mgr);
     }
 
     /**
@@ -59,7 +72,20 @@ public class Participant {
      * @param msg The message to send.
      */
     public void send(String msg) {
-        remoteNode.recvMsg(msg);
+        try {
+            remoteNode.recvMsg(msg);
+        } catch (RemoteException re) {
+            throw new MessageException("Failed to deliver message to " + username + ".");
+        }
+    }
+
+    /**
+     * Send the specified message to all participants in the conversation, including myself.
+     *
+     * @param msg The message to send.
+     */
+    public void broadcast(String msg) {
+        participantMgr.broadcast(username + USERNAME_DELIMETER + msg);
     }
 
     /**
@@ -76,8 +102,16 @@ public class Participant {
     /**
      * @param username The new username of this participant.
      */
-    public void setUsername(String username) {
+    public void changeUsername(String username) {
         this.username = username;
+        broadcast(username + JOIN_MESSAGE);
+    }
+
+    /**
+     * Inform other participants that this participant is leaving the conversation.
+     */
+    public void leaveConversation() {
+        broadcast(username + LEAVE_MESSAGE);
     }
 
 }

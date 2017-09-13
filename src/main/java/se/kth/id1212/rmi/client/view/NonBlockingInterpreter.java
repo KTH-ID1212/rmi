@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.client.view;
+package se.kth.id1212.rmi.client.view;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
-import se.kth.id1212.rmi.objprotocolchat.common.ChatClient;
-import se.kth.id1212.rmi.objprotocolchat.common.ChatServer;
+import se.kth.id1212.rmi.common.ChatClient;
+import se.kth.id1212.rmi.common.ChatServer;
+import se.kth.id1212.rmi.common.Credentials;
 
 /**
  * Reads and interprets user commands. The command interpreter will run in a separate thread, which
@@ -38,14 +39,15 @@ import se.kth.id1212.rmi.objprotocolchat.common.ChatServer;
 public class NonBlockingInterpreter implements Runnable {
     private static final String PROMPT = "> ";
     private final Scanner console = new Scanner(System.in);
-    private final ConsoleOutput myRemoteObj;
     private final ThreadSafeStdOut outMgr = new ThreadSafeStdOut();
+    private final ChatClient myRemoteObj;
     private ChatServer server;
+    private long myIdAtServer;
     private boolean receivingCmds = false;
 
     public NonBlockingInterpreter() throws RemoteException {
         myRemoteObj = new ConsoleOutput();
-    } 
+    }
 
     /**
      * Starts the interpreter. The interpreter will be waiting for user input when this method
@@ -54,6 +56,7 @@ public class NonBlockingInterpreter implements Runnable {
      * @param server The server with which this chat client will communicate.
      */
     public void start(ChatServer server) {
+        this.server = server;
         if (receivingCmds) {
             return;
         }
@@ -72,19 +75,25 @@ public class NonBlockingInterpreter implements Runnable {
                 switch (cmdLine.getCmd()) {
                     case QUIT:
                         receivingCmds = false;
-                        server.disconnect(myRemoteObj);
+                        server.leaveConversation(myIdAtServer);
+                        boolean forceUnexport = false;
+                        UnicastRemoteObject.unexportObject(myRemoteObj, forceUnexport);
                         break;
                     case CONNECT:
-                        server.joinConversation(myRemoteObj);
+                        myIdAtServer
+                                = server.login(myRemoteObj,
+                                                          new Credentials(cmdLine.getParameter(0),
+                                                                          cmdLine.getParameter(1)));
                         break;
                     case USER:
-                        server.setUsername(myRemoteObj, cmdLine.getParameter(0));
+                        server.changeNickname(myIdAtServer, cmdLine.getParameter(0));
                         break;
                     default:
-                        server.broadcastMsg(cmdLine.getUserInput());
+                        server.broadcastMsg(myIdAtServer, cmdLine.getUserInput());
                 }
             } catch (Exception e) {
                 outMgr.println("Operation failed");
+                e.printStackTrace();
             }
         }
     }
@@ -102,7 +111,6 @@ public class NonBlockingInterpreter implements Runnable {
         @Override
         public void recvMsg(String msg) {
             outMgr.println((String) msg);
-            outMgr.print(PROMPT);
         }
     }
 }

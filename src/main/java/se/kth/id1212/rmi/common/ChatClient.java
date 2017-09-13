@@ -21,25 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.server.startup;
+package se.kth.id1212.rmi.common;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
-import se.kth.id1212.rmi.objprotocolchat.server.controller.Controller;
 
 /**
- * Starts the chat servant and binds it in the RMI registry.
+ * The callback methods of a chat client.
  */
-public class Main {
+public interface ChatClient extends Remote{
     /**
-     * @param args There are no command line arguments.
+     * The specified message is received by the client.
+     *
+     * @param msg The message that shall be received.
      */
-    public static void main(String[] args) {
-        try {
-            Naming.rebind(Controller.SERVER_NAME_IN_REGISTRY, new Controller());
-        } catch (MalformedURLException | RemoteException ex) {
-            System.out.println("Could not start chat server.");
-        }
-    }
+    void recvMsg(String msg) throws RemoteException;
 }

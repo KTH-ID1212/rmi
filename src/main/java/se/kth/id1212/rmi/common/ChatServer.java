@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package se.kth.id1212.rmi.objprotocolchat.common;
+package se.kth.id1212.rmi.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -37,29 +37,33 @@ public interface ChatServer extends Remote {
      *
      * @param remoteNode The remote endpoint of the joining participant. This is the remote object
      *                   that will be used to send messages to the participant.
+     * @param credentials The credentials of the joining participant. 
+     * @return The id of the joining participant. A participant must use this id for identification
+     *         in all communication with the server.
      */
-    void joinConversation(ChatClient remoteNode) throws RemoteException;
+    long login(ChatClient remoteNode, Credentials credentials) throws RemoteException;
 
     /**
      * Sets a new username for the participant with the specified remote endpoint.
      *
-     * @param remoteNode The remote endpoint of the participant wishing to change username.
+     * @param id The id of the participant wishing to change username.
      * @param userName   The participant's new username.
      */
-    void setUsername(ChatClient remoteNode, String username) throws RemoteException;
+    void changeNickname(long id, String username) throws RemoteException;
 
     /**
      * Broadcasts the specified message to all participants in the conversation.
      *
-     * @param msg The message to broadcast.
+     * @param id The id of the broadcasting participant.
+     * @param msg        The message to broadcast.
      */
-    void broadcastMsg(String msg) throws RemoteException;
+    void broadcastMsg(long id, String msg) throws RemoteException;
 
     /**
      * The specified participant is removed from the conversation, no more messages will be sent to
      * that node.
      *
-     * @param remoteNode The remote endpoint of the leaving participant.
+     * @param id The id of the leaving participant.
      */
-    void disconnect(ChatClient remoteNode) throws RemoteException;
+    void leaveConversation(long id) throws RemoteException;
 }
