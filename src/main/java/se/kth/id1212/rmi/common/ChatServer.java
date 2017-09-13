@@ -30,6 +30,9 @@ import java.rmi.RemoteException;
  * The remote methods of a chat server.
  */
 public interface ChatServer extends Remote {
+    /**
+     * The default URI of the chat server in the RMI registry.
+     */
     public static final String SERVER_NAME_IN_REGISTRY = "CHAT_SERVER";
 
     /**
