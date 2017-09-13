@@ -23,6 +23,7 @@
  */
 package se.kth.id1212.rmi.server.model;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -35,7 +36,7 @@ import se.kth.id1212.rmi.common.ChatClient;
 public class ParticipantManager {
     private final Random idGenerator = new Random();
     private final Conversation conversation = new Conversation();
-    private final Map<Long, Participant> participants = new HashMap<>();
+    private final Map<Long, Participant> participants = Collections.synchronizedMap(new HashMap<>());
 
     public long createParticipant(ChatClient remoteNode) {
         long participantId = idGenerator.nextLong();
@@ -84,8 +85,10 @@ public class ParticipantManager {
      */
     public void broadcast(String msg) {
         conversation.appendEntry(msg);
-        for (Participant participant : participants.values()) {
-            participant.send(msg);
+        synchronized (participants) {
+            for (Participant participant : participants.values()) {
+                participant.send(msg);
+            }
         }
     }
 

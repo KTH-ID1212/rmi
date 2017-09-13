@@ -28,7 +28,6 @@ import java.rmi.server.UnicastRemoteObject;
 import se.kth.id1212.rmi.common.ChatClient;
 import se.kth.id1212.rmi.common.ChatServer;
 import se.kth.id1212.rmi.common.Credentials;
-import se.kth.id1212.rmi.server.model.Participant;
 import se.kth.id1212.rmi.server.model.ParticipantManager;
 
 /**
@@ -36,9 +35,9 @@ import se.kth.id1212.rmi.server.model.ParticipantManager;
  * nodes. Note that there can only be one chat conversation at a time. All participants participate
  * in that same conversation.
  */
-public class Controller extends UnicastRemoteObject implements ChatServer {    
-    private final ParticipantManager participantManager= new ParticipantManager();
-    
+public class Controller extends UnicastRemoteObject implements ChatServer {
+    private final ParticipantManager participantManager = new ParticipantManager();
+
     public Controller() throws RemoteException {
     }
 
