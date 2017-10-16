@@ -26,8 +26,8 @@ package se.kth.id1212.rmi.usingid1212oom.client.controller;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
-import se.kth.id1212.rmi.usingid1212oom.client.net.ServerConnection;
-import se.kth.id1212.rmi.usingid1212oom.client.net.OutputHandler;
+import se.kth.id1212.id1212oom.client.ServerConnection;
+import se.kth.id1212.id1212oom.client.OutputHandler;
 
 /**
  * This controller decouples the view from the network layer. All methods, except

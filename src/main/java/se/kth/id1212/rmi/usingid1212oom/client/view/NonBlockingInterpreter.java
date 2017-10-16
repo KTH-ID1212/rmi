@@ -25,7 +25,7 @@ package se.kth.id1212.rmi.usingid1212oom.client.view;
 
 import java.util.Scanner;
 import se.kth.id1212.rmi.usingid1212oom.client.controller.Controller;
-import se.kth.id1212.rmi.usingid1212oom.client.net.OutputHandler;
+import se.kth.id1212.id1212oom.client.OutputHandler;
 
 /**
  * Reads and interprets user commands. The command interpreter will run in a separate thread, which

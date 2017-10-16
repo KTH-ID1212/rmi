@@ -22,17 +22,27 @@
  * THE SOFTWARE.
  */
 
-package se.kth.id1212.rmi.usingid1212oom.common;
+package se.kth.id1212.rmi.usingid1212oom.server.startup;
+
+import se.kth.id1212.id1212oom.server.ChatServer;
 
 /**
- * Thrown when the expected message could not be received.
+ * Starts the chat server.
  */
-public class MessageException extends RuntimeException {
-    public MessageException(String msg) {
-        super(msg);
-    }
-    
-    public MessageException(Throwable rootCause) {
-        super(rootCause);
+public class Main {    
+    /**
+     * @param args Takes one command line argument, the number of the port on which the server will
+     *             listen, the default is <code>8080</code>.
+     */
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            try {
+                new ChatServer(Integer.parseInt(args[1])).start();
+                return;
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port number, using default.");
+            }
+        }
+        new ChatServer().start();
     }
 }
