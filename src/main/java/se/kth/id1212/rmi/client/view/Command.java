@@ -35,7 +35,7 @@ public enum Command {
      * Establish a connection to the server. The first parameter is IP address (or host name), the
      * second is port number.
      */
-    CONNECT,
+    LOGIN,
     /**
      * Leave the chat application.
      */

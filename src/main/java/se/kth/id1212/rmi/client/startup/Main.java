@@ -23,12 +23,8 @@
  */
 package se.kth.id1212.rmi.client.startup;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import se.kth.id1212.rmi.client.view.NonBlockingInterpreter;
-import se.kth.id1212.rmi.common.ChatServer;
 
 /**
  * Starts the chat client.
@@ -39,10 +35,9 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            ChatServer server = (ChatServer) Naming.lookup(ChatServer.SERVER_NAME_IN_REGISTRY);
-            new NonBlockingInterpreter().start(server);
-        } catch (NotBoundException | MalformedURLException | RemoteException ex) {
-            System.out.println("Could not start chat client.");
+            new NonBlockingInterpreter().start();
+        } catch (RemoteException ex) {
+            System.out.println("Could not start client.");
         }
     }
 }

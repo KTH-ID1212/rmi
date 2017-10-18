@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import se.kth.id1212.rmi.common.ChatClient;
+import se.kth.id1212.rmi.common.Credentials;
 
 /**
  * Keeps track of all active participants in the conversation, and is also responsible for sending
@@ -38,9 +39,10 @@ public class ParticipantManager {
     private final Conversation conversation = new Conversation();
     private final Map<Long, Participant> participants = Collections.synchronizedMap(new HashMap<>());
 
-    public long createParticipant(ChatClient remoteNode) {
+    public long createParticipant(ChatClient remoteNode, Credentials credentials) {
         long participantId = idGenerator.nextLong();
-        Participant newParticipant = new Participant(participantId, remoteNode, this);
+        Participant newParticipant = new Participant(participantId, credentials.getUsername(),
+                                                     remoteNode, this);
         participants.put(participantId, newParticipant);
         return participantId;
     }
@@ -83,7 +85,7 @@ public class ParticipantManager {
      *
      * @param msg The message to send.
      */
-    public void broadcast(String msg) {
+    void broadcast(String msg) {
         conversation.appendEntry(msg);
         synchronized (participants) {
             for (Participant participant : participants.values()) {

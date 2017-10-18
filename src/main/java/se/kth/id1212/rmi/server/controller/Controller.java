@@ -43,8 +43,7 @@ public class Controller extends UnicastRemoteObject implements ChatServer {
 
     @Override
     public long login(ChatClient remoteNode, Credentials credentials) {
-        System.out.println("User " + credentials.getUsername() + " logged in.");
-        long participantId = participantManager.createParticipant(remoteNode);
+        long participantId = participantManager.createParticipant(remoteNode, credentials);
         participantManager.sendConvToParticipant(participantId);
         return participantId;
     }

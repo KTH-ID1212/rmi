@@ -23,6 +23,9 @@
  */
 package se.kth.id1212.rmi.client.view;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
@@ -52,11 +55,8 @@ public class NonBlockingInterpreter implements Runnable {
     /**
      * Starts the interpreter. The interpreter will be waiting for user input when this method
      * returns. Calling <code>start</code> on an interpreter that is already started has no effect.
-     *
-     * @param server The server with which this chat client will communicate.
      */
-    public void start(ChatServer server) {
-        this.server = server;
+    public void start() {
         if (receivingCmds) {
             return;
         }
@@ -79,11 +79,12 @@ public class NonBlockingInterpreter implements Runnable {
                         boolean forceUnexport = false;
                         UnicastRemoteObject.unexportObject(myRemoteObj, forceUnexport);
                         break;
-                    case CONNECT:
+                    case LOGIN:
+                        lookupServer(cmdLine.getParameter(0));
                         myIdAtServer
                                 = server.login(myRemoteObj,
-                                                          new Credentials(cmdLine.getParameter(0),
-                                                                          cmdLine.getParameter(1)));
+                                               new Credentials(cmdLine.getParameter(1),
+                                                               cmdLine.getParameter(2)));
                         break;
                     case USER:
                         server.changeNickname(myIdAtServer, cmdLine.getParameter(0));
@@ -93,9 +94,14 @@ public class NonBlockingInterpreter implements Runnable {
                 }
             } catch (Exception e) {
                 outMgr.println("Operation failed");
-                e.printStackTrace();
             }
         }
+    }
+
+    private void lookupServer(String host) throws NotBoundException, MalformedURLException,
+                                                  RemoteException {
+        server = (ChatServer) Naming.lookup(
+                "//" + host + "/" + ChatServer.SERVER_NAME_IN_REGISTRY);
     }
 
     private String readNextLine() {
